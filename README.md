@@ -1,4 +1,4 @@
-# 📄 RFP Intelligence — AI-Powered Go/No-Go Analyzer
+#  RFP Intelligence — AI-Powered Go/No-Go Analyzer
 
 > Upload an RFP. Get deliverables, evaluation weights, a department compliance checklist, and a Go / No-Go recommendation — in minutes, not days.
 
@@ -6,20 +6,20 @@
 
 ---
 
-## ✨ What It Does
+##  What It Does
 
 Companies waste hours manually reading government and enterprise RFPs before deciding whether to bid. **RFP Intelligence** automates that pre-bid review:
 
 | Step | What Happens |
 |------|-------------|
-| 📤 Upload | Drop a PDF, DOCX, or TXT RFP — text is extracted entirely in your browser |
-| 🏢 Profile | Describe your company's strengths and known gaps in two text boxes |
-| 🤖 Analyze | Gemini AI reads the RFP against your profile and returns structured JSON |
-| 📊 Results | View deliverables + time estimates, evaluation criteria weights, a compliance checklist, and a scored verdict |
+| Upload | Drop a PDF, DOCX, or TXT RFP — text is extracted entirely in your browser |
+| Profile | Describe your company's strengths and known gaps in two text boxes |
+| Analyze | Gemini AI reads the RFP against your profile and returns structured JSON |
+| Results | View deliverables + time estimates, evaluation criteria weights, a compliance checklist, and a scored verdict |
 
 ---
 
-## 🖥️ Screenshots
+##  Screenshots
 
 <details>
 <summary>Click to expand all screenshots</summary>
@@ -47,7 +47,7 @@ Companies waste hours manually reading government and enterprise RFPs before dec
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 rfp-intelligence/
@@ -75,7 +75,7 @@ No raw document bytes ever leave your machine. Only extracted plain text is sent
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -121,7 +121,7 @@ npx serve ../frontend
 
 ---
 
-## 📋 Output Sections
+##  Output Sections
 
 ### § 1 — Deliverables & Time Estimate
 Each deliverable extracted from the RFP with:
@@ -136,9 +136,9 @@ Requirements grouped by department with status badges:
 
 | Badge | Meaning |
 |-------|---------|
-| ✅ **MET** | Your stated strengths clearly satisfy this requirement |
-| ⚠️ **REVIEW** | Cannot confirm from your profile — human review needed |
-| ❌ **GAP** | Your stated gaps directly conflict with this requirement |
+|  **MET** | Your stated strengths clearly satisfy this requirement |
+|  **REVIEW** | Cannot confirm from your profile — human review needed |
+|  **GAP** | Your stated gaps directly conflict with this requirement |
 
 Departments covered: **Technical · Legal · Accounting · Operations**
 
@@ -150,7 +150,7 @@ Departments covered: **Technical · Legal · Accounting · Operations**
 
 ---
 
-## 🔒 Security
+##  Security
 
 - API key lives only in `backend/.env` — never in frontend code
 - `.env` is in `.gitignore` and will never be committed
@@ -161,7 +161,7 @@ Departments covered: **Technical · Legal · Accounting · Operations**
 
 ---
 
-## ☁️ Deploying to Production
+##  Deploying to Production
 
 | Part | Recommended Platform | Notes |
 |------|---------------------|-------|
@@ -170,7 +170,7 @@ Departments covered: **Technical · Legal · Accounting · Operations**
 
 ---
 
-## 🧪 Sample Test Result
+##  Sample Test Result
 
 Tested against **Dummy_RFP_2026-CTY-0417.pdf** (City permit-management system RFP):
 
@@ -185,7 +185,7 @@ Gaps Found   : 1 (Critical — Cyber Liability insurance $2M vs $5M required)
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Frontend:** Vanilla HTML, CSS, JavaScript (zero dependencies, no build step)
 - **Backend:** Node.js, Express, dotenv, express-rate-limit
@@ -194,7 +194,7 @@ Gaps Found   : 1 (Critical — Cyber Liability insurance $2M vs $5M required)
 
 ---
 
-## 📄 License
+##  License
 
 MIT — free to use, modify, and deploy.
 
