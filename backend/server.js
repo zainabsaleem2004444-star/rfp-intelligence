@@ -83,7 +83,13 @@ function buildPrompt(rfpText, strengths, gaps) {
     {
       "department": "Legal" | "Accounting" | "Technical" | "Operations" | "Other",
       "items": [
-        {"requirement": "string", "status": "met" | "gap" | "needs_review", "note": "short reason referencing the company's stated capabilities or gaps"}
+        {
+          "requirement": "string - short name of the requirement",
+          "rfp_excerpt": "string - the actual clause/line from the RFP this is based on, close-paraphrased with exact numbers, dates, dollar amounts, or percentages preserved. This is shown side-by-side against the company's position, so it must be specific, not generic.",
+          "status": "met" | "gap" | "needs_review",
+          "company_position": "string - what the company's stated strengths or gaps say about this specific requirement. If nothing was stated either way, say so explicitly (e.g. 'Not addressed in provided strengths/gaps').",
+          "reason": "string - 1-2 sentence explanation of exactly why this requirement was marked met/gap/needs_review, directly connecting the rfp_excerpt to the company_position. For 'gap' items this must clearly state what is missing or in conflict, so it reads as the specific reason this item was rejected."
+        }
       ]
     }
   ],
@@ -101,6 +107,9 @@ Rules:
 - Group compliance_departments to match the kinds of requirements actually present (legal/contractual terms -> Legal; payment/financial/insurance/cost terms -> Accounting; system/security/architecture terms -> Technical; project management/timeline/staffing terms -> Operations). Only include departments that have at least one relevant requirement in this RFP.
 - Mark a compliance item "gap" only if the company's stated gaps text directly conflicts with or fails to meet that requirement. Mark "met" if their stated strengths clearly satisfy it. Use "needs_review" if it's unclear from what they told you.
 - Be specific and reference actual language/numbers from the RFP (deadlines, dollar amounts, percentages, page limits) where relevant.
+- Every compliance item MUST include both rfp_excerpt (what the RFP actually requires, specific and quoted/paraphrased with numbers intact) and company_position (what the company said, or an explicit note that they said nothing about it) so the two can be displayed side by side.
+- The "reason" field is mandatory for every item, not just gaps -- it is the explanation a reviewer will read to understand the status at a glance. Never leave it generic ("does not meet requirement"); always say specifically what's missing, what conflicts, or what evidence satisfies it.
+- Produce a thorough checklist: do not skip minor requirements. Aim to surface every distinct compliance-relevant requirement in the RFP text, not just the major ones.
 - Output strictly valid JSON. No trailing commas. No comments. No markdown code fences.
 
 COMPANY STATED STRENGTHS:

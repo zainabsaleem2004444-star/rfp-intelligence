@@ -6,457 +6,364 @@
 <title>RFP Intelligence — Go/No-Go Analyzer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="vendor/html2pdf.bundle.min.js"></script>
 <style>
   :root{
-    --ink:#161a1e;
-    --navy:#142a4a;
-    --navy-2:#1f3d6b;
-    --kraft:#e7dec4;
-    --kraft-line:#c9bd98;
-    --paper:#faf7ee;
-    --paper-2:#fffdf7;
-    --line:#dfd4ad;
-    --stamp-red:#b23b32;
-    --stamp-red-bg:#fbe9e6;
-    --stamp-green:#1f6b45;
-    --stamp-green-bg:#e6f1ea;
-    --stamp-amber:#b3791f;
-    --stamp-amber-bg:#fbf0dd;
-    --muted:#6e6452;
-    --muted-2:#9a8f74;
-    --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
-    --serif:"Fraunces","Iowan Old Style",Georgia,serif;
-    --sans:"Inter","Helvetica Neue",Arial,sans-serif;
+    --ink:#13202b;
+    --paper:#f6f3ec;
+    --paper-2:#ffffff;
+    --line:#dcd5c4;
+    --brand:#1f3864;
+    --brand-2:#2e5090;
+    --accent:#c5701f;
+    --good:#1c7a4d;
+    --good-bg:#e7f5ec;
+    --bad:#a32626;
+    --bad-bg:#fbeaea;
+    --warn:#9a6b00;
+    --warn-bg:#fdf3df;
+    --muted:#6b6557;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
   }
   *{box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
   body{
     margin:0;
-    background:
-      radial-gradient(900px 500px at 100% -10%, #f1e8d2 0%, transparent 60%),
-      var(--paper);
+    background:var(--paper);
     color:var(--ink);
-    font-family:var(--serif);
-    line-height:1.55;
+    font-family:"Source Serif Pro","Iowan Old Style",Georgia,serif;
+    line-height:1.5;
   }
-  @media (prefers-reduced-motion: reduce){
-    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
-  }
+  .sans{font-family:"Inter","Helvetica Neue",Arial,sans-serif;}
+  .shell{max-width:980px;margin:0 auto;padding:48px 28px 100px;}
 
-  .shell{max-width:980px;margin:0 auto;padding:52px 28px 110px;position:relative;}
-
-  /* ===== MASTHEAD — case file header ===== */
   .masthead{
-    position:relative;
     border-bottom:3px solid var(--ink);
-    padding-bottom:22px;
-    margin-bottom:8px;
+    padding-bottom:18px;
+    margin-bottom:36px;
     display:flex;
     justify-content:space-between;
     align-items:flex-end;
-    gap:24px;
+    gap:20px;
     flex-wrap:wrap;
   }
-  .masthead .file-meta{
-    font-family:var(--mono);
-    font-size:11px;
-    letter-spacing:0.04em;
-    color:var(--muted-2);
-    margin-bottom:10px;
-  }
   .masthead h1{
-    font-family:var(--serif);
-    font-weight:900;
-    font-optical-sizing:auto;
-    letter-spacing:-0.01em;
-    font-size:42px;
-    margin:0 0 2px 0;
-    color:var(--navy);
-    line-height:1.02;
+    font-family:"Inter",sans-serif;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    font-size:30px;
+    margin:0 0 4px 0;
+    color:var(--ink);
   }
   .masthead .kicker{
-    font-family:var(--sans);
+    font-family:"Inter",sans-serif;
     text-transform:uppercase;
-    letter-spacing:0.16em;
-    font-size:10.5px;
-    color:var(--stamp-red);
+    letter-spacing:0.14em;
+    font-size:11px;
+    color:var(--accent);
     font-weight:700;
-    margin-bottom:6px;
   }
   .masthead .tag{
-    font-family:var(--sans);
+    font-family:"Inter",sans-serif;
     font-size:12.5px;
     color:var(--muted);
     text-align:right;
-    max-width:280px;
-    line-height:1.6;
+    max-width:260px;
   }
-  .pipeline-bar{
-    display:flex;
-    font-family:var(--mono);
-    font-size:10.5px;
-    letter-spacing:0.05em;
-    color:var(--muted-2);
-    gap:0;
-    margin:14px 0 40px;
-  }
-  .pipeline-bar span{
-    padding:7px 0;
-    flex:1;
-    text-align:center;
-    border-bottom:2px solid var(--kraft-line);
-    text-transform:uppercase;
-    transition:color .2s, border-color .2s;
-  }
-  .pipeline-bar span.active{color:var(--navy);border-color:var(--navy);font-weight:600;}
 
-  /* ===== CARD as case-file folder ===== */
   .card{
     background:var(--paper-2);
     border:1px solid var(--line);
-    border-top:none;
-    box-shadow: 0 1px 0 var(--line), 0 14px 30px -22px rgba(20,30,50,0.25);
-    padding:32px;
-    margin-bottom:26px;
-    position:relative;
-  }
-  .card::before{
-    content:"";
-    position:absolute; top:-1px; left:24px;
-    width:120px; height:1px;
-    background:var(--paper-2);
-  }
-  .folder-tab{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    background:var(--kraft);
-    border:1px solid var(--kraft-line);
-    border-bottom:none;
-    padding:8px 18px 10px;
-    margin-left:20px;
-    font-family:var(--sans);
-    font-weight:700;
-    font-size:11px;
-    letter-spacing:0.07em;
-    text-transform:uppercase;
-    color:var(--navy);
-    position:relative;
-    top:1px;
-    clip-path:polygon(6% 0, 94% 0, 100% 100%, 0 100%);
-  }
-  .folder-tab .dot{
-    width:6px;height:6px;border-radius:50%;background:var(--stamp-red);flex:none;
+    border-radius:2px;
+    padding:28px;
+    margin-bottom:24px;
   }
 
-  /* ===== UPLOAD ZONE — manila intake slot ===== */
   .drop{
-    border:2px dashed var(--kraft-line);
-    background:
-      repeating-linear-gradient(135deg, transparent, transparent 11px, rgba(199,189,152,0.18) 11px, rgba(199,189,152,0.18) 12px),
-      var(--kraft);
-    padding:46px 24px;
+    border:2px dashed var(--line);
+    border-radius:2px;
+    padding:40px 24px;
     text-align:center;
     cursor:pointer;
-    transition:border-color .15s ease, transform .12s ease;
+    transition:border-color .15s ease, background .15s ease;
   }
   .drop:hover, .drop.drag{
-    border-color:var(--navy);
-    transform:translateY(-1px);
+    border-color:var(--brand);
+    background:#fafaf6;
   }
   .drop input{display:none;}
-  .drop .icon{
-    font-size:26px;margin-bottom:14px;display:inline-flex;
-    width:52px;height:52px;align-items:center;justify-content:center;
-    background:var(--paper-2);border:1px solid var(--kraft-line);
-    border-radius:2px;
-    transform:rotate(-3deg);
-  }
-  .drop .main{font-family:var(--sans);font-weight:700;font-size:15px;color:var(--navy);}
-  .drop .sub{font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:7px;}
+  .drop .icon{font-size:30px;margin-bottom:10px;display:block;}
+  .drop .main{font-family:"Inter",sans-serif;font-weight:600;font-size:15px;}
+  .drop .sub{font-family:"Inter",sans-serif;font-size:12.5px;color:var(--muted);margin-top:6px;}
 
   .filepill{
     display:flex;align-items:center;justify-content:space-between;
-    background:var(--paper-2);border:1px solid var(--line);border-left:3px solid var(--navy);
-    padding:13px 18px;margin-top:14px;
-    font-family:var(--sans);font-size:13px;
+    background:#fafaf6;border:1px solid var(--line);
+    padding:12px 16px;border-radius:2px;margin-top:14px;
+    font-family:"Inter",sans-serif;font-size:13.5px;
   }
-  .filepill .fname{font-weight:600;}
   .filepill button{
-    background:none;border:none;color:var(--stamp-red);cursor:pointer;
-    font-family:var(--sans);font-size:12px;font-weight:700;
-    text-transform:uppercase;letter-spacing:0.04em;
+    background:none;border:none;color:var(--bad);cursor:pointer;
+    font-family:"Inter",sans-serif;font-size:12.5px;font-weight:600;
   }
 
   label.field-label{
-    display:flex;align-items:baseline;gap:8px;
-    font-family:var(--sans);font-weight:700;
-    font-size:11.5px;text-transform:uppercase;letter-spacing:0.08em;
-    color:var(--navy);margin-bottom:12px;
+    display:block;font-family:"Inter",sans-serif;font-weight:600;
+    font-size:12.5px;text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--muted);margin-bottom:8px;
   }
-  label.field-label .step-no{
-    font-family:var(--serif);font-weight:900;font-size:20px;color:var(--stamp-red);
-    line-height:1;
+  textarea, input[type=password]{
+    width:100%;border:1px solid var(--line);border-radius:2px;
+    padding:10px 12px;font-family:var(--mono);font-size:13px;
+    background:#fffdf8;color:var(--ink);
   }
-
-  textarea{
-    width:100%;border:1px solid var(--line);
-    padding:12px 14px;font-family:var(--mono);font-size:12.5px;line-height:1.6;
-    background:var(--paper-2);color:var(--ink);
-    resize:vertical;min-height:96px;
-  }
-  textarea:focus{outline:2px solid var(--navy-2);outline-offset:1px;}
+  textarea{resize:vertical;min-height:64px;}
 
   .capgrid{
-    display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:4px;
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;
   }
-  .capgrid .grp{display:flex;flex-direction:column;gap:8px;}
-  .capgrid .grp span{
-    font-family:var(--sans);font-size:11px;font-weight:600;color:var(--muted);
-    display:flex;align-items:center;gap:6px;
-  }
-  .swatch{width:8px;height:8px;border-radius:50%;flex:none;}
-  .swatch.s-good{background:var(--stamp-green);}
-  .swatch.s-gap{background:var(--stamp-red);}
+  .capgrid textarea{min-height:56px;}
+  .capgrid .grp{display:flex;flex-direction:column;gap:6px;}
+  .capgrid .grp span{font-family:"Inter",sans-serif;font-size:11.5px;color:var(--muted);}
 
   .btn{
-    font-family:var(--sans);font-weight:700;font-size:14.5px;
-    background:var(--navy);color:var(--paper);border:none;
-    padding:16px 28px;cursor:pointer;
-    letter-spacing:0.02em;
-    transition:background .15s ease, transform .1s ease;
-    position:relative;
+    font-family:"Inter",sans-serif;font-weight:700;font-size:14px;
+    background:var(--brand);color:white;border:none;
+    padding:13px 26px;border-radius:2px;cursor:pointer;
+    letter-spacing:0.01em;
+    transition:background .15s ease;
   }
-  .btn:hover{background:var(--navy-2);}
-  .btn:active{transform:translateY(1px);}
-  .btn:disabled{background:#bdb6a0;cursor:not-allowed;}
+  .btn:hover{background:var(--brand-2);}
+  .btn:disabled{background:#b8b8b0;cursor:not-allowed;}
   .btn.full{width:100%;}
   .btn.ghost{
-    background:transparent;color:var(--navy);border:1.5px solid var(--navy);
+    background:transparent;color:var(--brand);border:1.5px solid var(--brand);
   }
-  .btn.ghost:hover{background:var(--kraft);}
+  .btn.ghost:hover{background:#eef2f8;}
 
-  .hint{font-family:var(--sans);font-size:12px;color:var(--muted);margin-top:11px;line-height:1.6;}
-  .hint a{color:var(--navy-2);}
+  .hint{font-family:"Inter",sans-serif;font-size:12px;color:var(--muted);margin-top:10px;line-height:1.5;}
+  .hint a{color:var(--brand);}
 
   .status{
-    font-family:var(--sans);font-size:13px;color:var(--muted);
-    display:flex;align-items:center;gap:10px;margin-top:18px;
+    font-family:"Inter",sans-serif;font-size:13px;color:var(--muted);
+    display:flex;align-items:center;gap:10px;margin-top:16px;
   }
   .spin{
-    width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--navy);
+    width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--brand);
     border-radius:50%;animation:sp .7s linear infinite;flex:none;
   }
   @keyframes sp{to{transform:rotate(360deg);}}
 
   .errbox{
-    font-family:var(--sans);font-size:13px;
-    background:var(--stamp-red-bg);color:var(--stamp-red);border:1px solid #e3b3ac;
-    padding:13px 16px;margin-top:14px;font-weight:500;
+    font-family:"Inter",sans-serif;font-size:13px;
+    background:var(--bad-bg);color:var(--bad);border:1px solid #e3b3b3;
+    padding:12px 14px;border-radius:2px;margin-top:14px;
   }
 
-  /* ===== RESULTS ===== */
+  /* RESULTS */
   #results{display:none;}
 
-  /* --- Verdict stamp --- */
-  .verdict-wrap{
-    position:relative;
-    border:1px solid var(--line);
-    background:var(--paper-2);
-    padding:36px 32px;
-    margin-bottom:30px;
-    overflow:hidden;
-  }
-  .verdict-wrap::before{
-    content:"";position:absolute;inset:0;
-    background-image:repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(20,42,74,0.035) 27px, rgba(20,42,74,0.035) 28px);
-    pointer-events:none;
-  }
   .verdict{
-    position:relative;
-    display:flex;align-items:center;gap:30px;flex-wrap:wrap;
+    border-radius:2px;padding:30px 28px;margin-bottom:28px;
+    display:flex;align-items:center;gap:24px;flex-wrap:wrap;
   }
-  .stamp{
-    font-family:var(--sans);font-weight:800;
-    font-size:15px;letter-spacing:0.06em;text-transform:uppercase;
-    border:3px solid currentColor;
-    padding:10px 18px;
-    transform:rotate(-6deg);
-    white-space:nowrap;
-    border-radius:3px;
-    animation:stampdrop .45s cubic-bezier(.2,1.4,.4,1) both;
-  }
-  @keyframes stampdrop{
-    0%{transform:rotate(-6deg) scale(2.4); opacity:0;}
-    60%{transform:rotate(-7deg) scale(0.96); opacity:1;}
-    100%{transform:rotate(-6deg) scale(1); opacity:1;}
-  }
-  .verdict.go .stamp{color:var(--stamp-green);}
-  .verdict.nogo .stamp{color:var(--stamp-red);}
-  .verdict.caution .stamp{color:var(--stamp-amber);}
-
-  .verdict .score-block{display:flex;flex-direction:column;align-items:center;min-width:96px;}
+  .verdict.go{background:var(--good-bg);border:1.5px solid var(--good);}
+  .verdict.nogo{background:var(--bad-bg);border:1.5px solid var(--bad);}
+  .verdict.caution{background:var(--warn-bg);border:1.5px solid var(--warn);}
   .verdict .score{
-    font-family:var(--serif);font-weight:900;font-size:54px;line-height:1;
+    font-family:"Inter",sans-serif;font-weight:800;font-size:46px;line-height:1;
+    min-width:110px;
   }
-  .verdict .score-label{font-family:var(--sans);font-size:9.5px;letter-spacing:0.1em;color:var(--muted-2);text-transform:uppercase;margin-top:2px;}
-  .verdict.go .score{color:var(--stamp-green);}
-  .verdict.nogo .score{color:var(--stamp-red);}
-  .verdict.caution .score{color:var(--stamp-amber);}
-
+  .verdict.go .score{color:var(--good);}
+  .verdict.nogo .score{color:var(--bad);}
+  .verdict.caution .score{color:var(--warn);}
   .verdict .vtext{flex:1;min-width:240px;}
   .verdict .vtext .label{
-    font-family:var(--sans);font-weight:800;font-size:18px;letter-spacing:-0.01em;
-    margin-bottom:6px;
+    font-family:"Inter",sans-serif;font-weight:800;font-size:20px;letter-spacing:-0.01em;
   }
-  .verdict.go .vtext .label{color:var(--stamp-green);}
-  .verdict.nogo .vtext .label{color:var(--stamp-red);}
-  .verdict.caution .vtext .label{color:var(--stamp-amber);}
-  .verdict .vtext p{margin:0;font-size:14.5px;color:var(--ink);font-family:var(--sans);line-height:1.6;}
+  .verdict.go .vtext .label{color:var(--good);}
+  .verdict.nogo .vtext .label{color:var(--bad);}
+  .verdict.caution .vtext .label{color:var(--warn);}
+  .verdict .vtext p{margin:6px 0 0;font-size:14.5px;color:var(--ink);}
 
   .section-h{
-    font-family:var(--sans);font-weight:800;font-size:12px;
-    text-transform:uppercase;letter-spacing:0.1em;color:var(--navy);
-    display:flex;align-items:center;gap:12px;
-    margin:38px 0 16px;
+    font-family:"Inter",sans-serif;font-weight:800;font-size:13px;
+    text-transform:uppercase;letter-spacing:0.08em;color:var(--brand);
+    border-bottom:2px solid var(--ink);padding-bottom:8px;margin:34px 0 16px;
   }
   .section-h:first-child{margin-top:0;}
-  .section-h::after{
-    content:"";flex:1;height:1px;background:var(--kraft-line);
-  }
-  .section-h .tag-no{
-    font-family:var(--mono);color:var(--stamp-red);font-weight:600;
-  }
 
   .deliv-row{
-    display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--line);
+    display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);
   }
   .deliv-row:last-child{border-bottom:none;}
   .deliv-row .idx{
-    font-family:var(--serif);font-weight:900;color:var(--kraft-line);
-    font-size:26px;min-width:38px;line-height:1;
+    font-family:"Inter",sans-serif;font-weight:800;color:var(--accent);
+    font-size:13px;min-width:26px;
   }
   .deliv-row .body{flex:1;}
-  .deliv-row .title{font-family:var(--sans);font-weight:700;font-size:15px;color:var(--ink);}
-  .deliv-row .desc{font-size:14px;color:#46403090;color:#4a4536;margin-top:4px;font-family:var(--sans);line-height:1.55;}
+  .deliv-row .title{font-weight:700;font-size:15.5px;}
+  .deliv-row .desc{font-size:14px;color:#3c4650;margin-top:3px;}
   .deliv-row .meta{
-    display:flex;gap:10px;margin-top:10px;font-family:var(--sans);font-size:11px;color:var(--muted);flex-wrap:wrap;align-items:center;
+    display:flex;gap:14px;margin-top:8px;font-family:"Inter",sans-serif;font-size:11.5px;color:var(--muted);flex-wrap:wrap;
   }
-  .deliv-row .meta b{color:var(--ink);font-family:var(--mono);}
+  .deliv-row .meta b{color:var(--ink);}
   .tag-est{
-    font-family:var(--sans);font-weight:700;font-size:10.5px;
-    background:#eef2f8;color:var(--navy);padding:4px 10px;letter-spacing:0.03em;white-space:nowrap;
+    font-family:"Inter",sans-serif;font-weight:700;font-size:11px;
+    background:#eef2f8;color:var(--brand);padding:3px 9px;border-radius:20px;white-space:nowrap;
   }
-  .tag-mand{background:var(--stamp-red-bg);color:var(--stamp-red);}
-  .tag-opt{background:var(--stamp-green-bg);color:var(--stamp-green);}
+  .tag-mand{background:#fdecec;color:var(--bad);}
+  .tag-opt{background:#eef6ef;color:var(--good);}
 
-  .crit-row{padding:14px 0;border-bottom:1px solid var(--line);}
+  .crit-row{padding:12px 0;border-bottom:1px solid var(--line);}
   .crit-row:last-child{border-bottom:none;}
   .crit-row .top{display:flex;justify-content:space-between;gap:12px;align-items:baseline;}
-  .crit-row .name{font-weight:700;font-size:15px;font-family:var(--sans);color:var(--ink);}
+  .crit-row .name{font-weight:700;font-size:15px;}
   .crit-row .weight{
-    font-family:var(--serif);font-weight:900;font-size:18px;color:var(--navy);white-space:nowrap;
+    font-family:"Inter",sans-serif;font-weight:800;font-size:13px;color:var(--brand);white-space:nowrap;
   }
-  .crit-row .desc{font-size:13.5px;color:#4a4536;margin-top:4px;font-family:var(--sans);line-height:1.55;}
-  .barwrap{height:5px;background:var(--kraft);margin-top:9px;overflow:hidden;}
-  .barfill{height:100%;background:var(--navy);transition:width .6s ease;}
+  .crit-row .desc{font-size:13.5px;color:#3c4650;margin-top:3px;}
+  .barwrap{height:6px;background:#eee;border-radius:4px;margin-top:8px;overflow:hidden;}
+  .barfill{height:100%;background:var(--brand);}
 
-  .dept-block{margin-bottom:26px;}
+  .dept-block{margin-bottom:26px;border:1px solid var(--line);border-radius:3px;overflow:hidden;}
   .dept-head{
-    font-family:var(--sans);font-weight:800;font-size:13px;
-    display:flex;align-items:center;gap:10px;margin-bottom:12px;
+    font-family:"Inter",sans-serif;font-weight:800;font-size:13.5px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:12px 16px;background:#fafaf6;border-bottom:1px solid var(--line);
+    cursor:pointer;user-select:none;
   }
+  .dept-head .left{display:flex;align-items:center;gap:10px;}
+  .dept-head .counts{font-size:11px;font-weight:600;color:var(--muted);}
+  .dept-head .chev{font-size:11px;color:var(--muted);transition:transform .15s ease;}
+  .dept-block.collapsed .chev{transform:rotate(-90deg);}
+  .dept-block.collapsed .dept-items{display:none;}
   .dept-badge{
-    font-family:var(--sans);font-size:10.5px;font-weight:700;
-    padding:4px 12px;letter-spacing:0.05em;text-transform:uppercase;
+    font-family:"Inter",sans-serif;font-size:11px;font-weight:700;
+    padding:3px 10px;border-radius:20px;
   }
-  .check-item{
-    display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);
-    font-family:var(--sans);align-items:flex-start;
+  .dept-items{padding:4px 16px 10px;}
+
+  /* Filter tabs for compliance checklist */
+  .filter-tabs{
+    display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;
+    font-family:"Inter",sans-serif;
   }
-  .check-item:last-child{border-bottom:none;}
-  .check-icon{
-    font-size:12px;min-width:20px;height:20px;text-align:center;flex:none;margin-top:1px;
-    display:flex;align-items:center;justify-content:center;
-    border:1.5px solid currentColor;border-radius:50%;font-weight:700;
+  .filter-tab{
+    font-size:12px;font-weight:700;padding:7px 14px;border-radius:20px;
+    border:1.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;
+    transition:all .12s ease;
   }
-  .check-icon.met{color:var(--stamp-green);}
-  .check-icon.gap{color:var(--stamp-red);}
-  .check-icon.review{color:var(--stamp-amber);}
-  .check-body .req{font-size:13.5px;font-weight:600;color:var(--ink);}
-  .check-body .note{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.5;}
+  .filter-tab .cnt{opacity:.7;font-weight:600;margin-left:3px;}
+  .filter-tab.active{border-color:var(--brand);background:var(--brand);color:#fff;}
+  .filter-tab.active.f-gap{border-color:var(--bad);background:var(--bad);}
+  .filter-tab.active.f-review{border-color:var(--warn);background:var(--warn);}
+  .filter-tab.active.f-met{border-color:var(--good);background:var(--good);}
+
+  /* Side-by-side compliance comparison item */
+  .compare-item{
+    border:1px solid var(--line);border-left-width:4px;border-radius:3px;
+    margin:10px 0;background:#fff;overflow:hidden;
+  }
+  .compare-item.st-gap{border-left-color:var(--bad);}
+  .compare-item.st-met{border-left-color:var(--good);}
+  .compare-item.st-review{border-left-color:var(--warn);}
+
+  .compare-top{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:11px 14px;background:#fdfcf9;border-bottom:1px solid var(--line);
+    font-family:"Inter",sans-serif;
+  }
+  .compare-top .req{font-size:13.5px;font-weight:700;color:var(--ink);}
+
+  .compare-grid{
+    display:grid;grid-template-columns:1fr 1fr;
+    font-family:"Inter",sans-serif;
+  }
+  .compare-col{padding:12px 14px;font-size:13px;}
+  .compare-col.rfp{border-right:1px solid var(--line);background:#fbfaf6;}
+  .compare-col .colhead{
+    font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--muted);margin-bottom:5px;display:flex;align-items:center;gap:5px;
+  }
+  .compare-col .txt{color:#3c4650;line-height:1.5;font-size:12.8px;}
+
+  .compare-reason{
+    padding:10px 14px;font-size:12.8px;line-height:1.5;
+    font-family:"Inter",sans-serif;border-top:1px dashed var(--line);
+    display:flex;gap:8px;align-items:flex-start;
+  }
+  .compare-item.st-gap .compare-reason{background:var(--bad-bg);color:#7a1c1c;}
+  .compare-item.st-met .compare-reason{background:var(--good-bg);color:#155c39;}
+  .compare-item.st-review .compare-reason{background:var(--warn-bg);color:#7a5600;}
+  .compare-reason .ricon{flex:none;font-weight:800;}
+  .compare-reason b{font-weight:800;}
 
   .status-pill{
-    font-family:var(--sans);font-size:10px;font-weight:800;
-    text-transform:uppercase;letter-spacing:0.05em;
-    padding:3px 9px;white-space:nowrap;flex:none;
+    font-family:"Inter",sans-serif;font-size:10.5px;font-weight:800;
+    text-transform:uppercase;letter-spacing:0.04em;
+    padding:3px 9px;border-radius:20px;white-space:nowrap;flex:none;
   }
-  .pill-met{background:var(--stamp-green-bg);color:var(--stamp-green);}
-  .pill-gap{background:var(--stamp-red-bg);color:var(--stamp-red);}
-  .pill-review{background:var(--stamp-amber-bg);color:var(--stamp-amber);}
+  .pill-met{background:var(--good-bg);color:var(--good);}
+  .pill-gap{background:var(--bad-bg);color:var(--bad);}
+  .pill-review{background:var(--warn-bg);color:var(--warn);}
+
+  @media (max-width:640px){
+    .compare-grid{grid-template-columns:1fr;}
+    .compare-col.rfp{border-right:none;border-bottom:1px solid var(--line);}
+  }
+
+  /* Sticky section nav for results */
+  .results-nav{
+    position:sticky;top:0;z-index:10;background:var(--paper);
+    display:flex;gap:4px;overflow-x:auto;padding:10px 0 12px;
+    margin-bottom:8px;border-bottom:1px solid var(--line);
+    font-family:"Inter",sans-serif;
+  }
+  .results-nav a{
+    flex:none;font-size:12px;font-weight:700;color:var(--muted);
+    padding:7px 13px;border-radius:20px;text-decoration:none;white-space:nowrap;
+    border:1px solid transparent;
+  }
+  .results-nav a:hover{background:#eee7d8;}
+  .results-nav a.active{background:var(--brand);color:#fff;}
+  .nav-pdf-btn{
+    margin-left:auto;flex:none;font-family:"Inter",sans-serif;font-size:12px;font-weight:700;
+    background:var(--accent);color:#fff;border:none;padding:8px 14px;border-radius:20px;
+    cursor:pointer;white-space:nowrap;transition:background .15s ease;
+  }
+  .nav-pdf-btn:hover{background:#a85c17;}
+  .nav-pdf-btn:disabled{background:#c7bda9;cursor:wait;}
+
+  /* Keep cards from splitting awkwardly across PDF pages */
+  .compare-item, .deliv-row, .crit-row, .dept-block, .verdict, .sumcell{
+    page-break-inside:avoid; break-inside:avoid;
+  }
+  .pdf-title{display:none;}
 
   .rationale-box{
-    background:var(--kraft);border-left:3px solid var(--navy);
-    padding:20px 22px;font-size:14.5px;margin-top:6px;font-family:var(--sans);
+    background:#fafaf6;border-left:3px solid var(--brand);
+    padding:16px 18px;font-size:14.5px;margin-top:6px;
   }
-  .rationale-box p{margin:0 0 8px;}
   .rationale-box ul{margin:8px 0 0;padding-left:20px;}
-  .rationale-box li{margin-bottom:7px;line-height:1.55;}
+  .rationale-box li{margin-bottom:5px;}
 
   .summary-grid{
-    display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
-    background:var(--line);
-    border:1px solid var(--line);
-    margin-bottom:0;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:8px;
   }
   .sumcell{
-    background:var(--paper-2);padding:18px 14px;text-align:center;
+    background:#fafaf6;border:1px solid var(--line);padding:14px;text-align:center;
   }
-  .sumcell .n{font-family:var(--serif);font-weight:900;font-size:30px;color:var(--navy);}
-  .sumcell .l{font-family:var(--sans);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);margin-top:5px;}
+  .sumcell .n{font-family:"Inter",sans-serif;font-weight:800;font-size:24px;}
+  .sumcell .l{font-family:"Inter",sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin-top:4px;}
 
-  .reset-row{text-align:center;margin-top:40px;}
-
-  footer.signoff{
-    margin-top:50px;padding-top:18px;border-top:1px solid var(--kraft-line);
-    font-family:var(--mono);font-size:10.5px;color:var(--muted-2);
-    display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;
-  }
+  .reset-row{text-align:center;margin-top:36px;}
 
   @media (max-width:640px){
     .capgrid{grid-template-columns:1fr;}
     .summary-grid{grid-template-columns:repeat(2,1fr);}
     .masthead{flex-direction:column;align-items:flex-start;}
     .masthead .tag{text-align:left;}
-    .masthead h1{font-size:32px;}
-    .pipeline-bar span{font-size:9px;padding:7px 2px;}
-    .verdict{gap:18px;}
-    .verdict .score{font-size:42px;}
   }
-   /* ===== Save as PDF ===== */
-  .save-pdf-row{text-align:center;margin-top:18px;}
-  .btn.save-pdf{
-    background:var(--stamp-green);color:#fff;border:none;
-  }
-  .btn.save-pdf:hover{background:#17532f;}
- 
-  @media print{
-    body{background:#fff;}
-    .masthead .tag, .pipeline-bar, .folder-tab,
-    #setup-card, .reset-row, .save-pdf-row, footer.signoff{
-      display:none !important;
-    }
-    .card, .verdict-wrap{
-      box-shadow:none !important;
-      border:1px solid #ccc !important;
-      page-break-inside:avoid;
-    }
-    .section-h{page-break-after:avoid;}
-    .stamp{animation:none !important;}
-  }
- 
 </style>
 </head>
 <body>
@@ -466,109 +373,109 @@
     <div>
       <div class="kicker">Pre-Bid Decision Support</div>
       <h1>RFP Intelligence</h1>
-      <div class="file-meta">CASE FILE — AUTOMATED INTAKE &amp; REVIEW</div>
     </div>
     <div class="tag">Upload an RFP. Get deliverables, evaluation weighting, a department compliance checklist, and a Go / No-Go call — in minutes, not days.</div>
   </div>
 
-  <div class="pipeline-bar">
-    <span class="active">01 Intake</span>
-    <span class="active">02 Capability Match</span>
-    <span id="pipeStep3">03 Review</span>
-    <span id="pipeStep4">04 Verdict</span>
-  </div>
-
-  <div id="setup-card">
-    <span class="folder-tab"><span class="dot"></span>Intake Folder</span>
-    <div class="card">
-      <label class="field-label"><span class="step-no">1</span> Upload the RFP document</label>
-      <div class="drop" id="dropzone">
-        <input type="file" id="fileInput" accept=".pdf,.docx,.txt">
-        <span class="icon">&#128196;</span>
-        <div class="main">Drop a PDF, DOCX, or TXT file here, or click to browse</div>
-        <div class="sub">Text is extracted entirely in your browser before anything is sent for analysis.</div>
-      </div>
-      <div id="filepill" style="display:none" class="filepill">
-        <span id="filename" class="fname"></span>
-        <button id="removeFile">Remove</button>
-      </div>
-
-      <div style="height:30px"></div>
-
-      <label class="field-label"><span class="step-no">2</span> Tell it about your company</label>
-      <div class="capgrid">
-        <div class="grp">
-          <span><span class="swatch s-good"></span>Core capabilities — what you're good at</span>
-          <textarea id="capStrengths" placeholder="e.g. Cloud SaaS workflow platforms, government permitting systems, SSO/SAML integration, PCI-DSS payment integrations, REST APIs, AWS GovCloud hosting...">Cloud-based workflow & case-management SaaS for government and enterprise clients. Strong in configurable rules engines, SSO/SAML, REST APIs, AWS GovCloud hosting, WCAG-compliant front-ends. Have shipped 4 municipal/county digital-services projects in the last 6 years.</textarea>
-        </div>
-        <div class="grp">
-          <span><span class="swatch s-gap"></span>Known gaps — things you don't have</span>
-          <textarea id="capGaps" placeholder="e.g. No in-house mobile app dev team, no GIS/ArcGIS experience, haven't done PCI integrations before, small company so limited insurance coverage...">No in-house native mobile app development team (would need a subcontractor for offline mobile features). No prior GIS/ArcGIS integration experience. Current Cyber Liability coverage is $2M, not $5M. Company revenue is under $10M/yr.</textarea>
-        </div>
-      </div>
-      <div class="hint">The more specific this is, the more useful the compliance checklist will be. Vague input gets vague scoring.</div>
-
-      <div style="height:30px"></div>
-      <button class="btn full" id="analyzeBtn">Analyze RFP</button>
-
-      <div id="statusRow" class="status" style="display:none">
-        <div class="spin"></div>
-        <span id="statusText">Working...</span>
-      </div>
-      <div id="errBox" class="errbox" style="display:none"></div>
+  <div id="setup-card" class="card">
+    <label class="field-label">1 — Upload the RFP document</label>
+    <div class="drop" id="dropzone">
+      <input type="file" id="fileInput" accept=".pdf,.docx,.txt">
+      <span class="icon">&#128196;</span>
+      <div class="main">Drop a PDF, DOCX, or TXT file here, or click to browse</div>
+      <div class="sub">Text is extracted entirely in your browser before anything is sent for analysis.</div>
     </div>
+    <div id="filepill" style="display:none" class="filepill">
+      <span id="filename"></span>
+      <button id="removeFile">Remove</button>
+    </div>
+
+    <div style="height:26px"></div>
+
+    <label class="field-label">2 — Tell it about your company (used to score fit)</label>
+    <div class="capgrid">
+      <div class="grp">
+        <span>Core capabilities / what you're good at</span>
+        <textarea id="capStrengths" placeholder="e.g. Cloud SaaS workflow platforms, government permitting systems, SSO/SAML integration, PCI-DSS payment integrations, REST APIs, AWS GovCloud hosting...">Cloud-based workflow & case-management SaaS for government and enterprise clients. Strong in configurable rules engines, SSO/SAML, REST APIs, AWS GovCloud hosting, WCAG-compliant front-ends. Have shipped 4 municipal/county digital-services projects in the last 6 years.</textarea>
+      </div>
+      <div class="grp">
+        <span>Known gaps / things you don't have</span>
+        <textarea id="capGaps" placeholder="e.g. No in-house mobile app dev team, no GIS/ArcGIS experience, haven't done PCI integrations before, small company so limited insurance coverage...">No in-house native mobile app development team (would need a subcontractor for offline mobile features). No prior GIS/ArcGIS integration experience. Current Cyber Liability coverage is $2M, not $5M. Company revenue is under $10M/yr.</textarea>
+      </div>
+    </div>
+    <div class="hint">The more specific this is, the more useful the compliance checklist will be. Vague input gets vague scoring.</div>
+
+    <div style="height:26px"></div>
+    <button class="btn full" id="analyzeBtn">Analyze RFP</button>
+
+    <div id="statusRow" class="status" style="display:none">
+      <div class="spin"></div>
+      <span id="statusText">Working...</span>
+    </div>
+    <div id="errBox" class="errbox" style="display:none"></div>
   </div>
 
   <div id="results">
-    <span class="folder-tab"><span class="dot"></span>Findings &amp; Verdict</span>
-    <div class="verdict-wrap">
+    <nav class="results-nav" id="resultsNav">
+      <a href="#sec-overview">Overview</a>
+      <a href="#sec-deliv">Deliverables</a>
+      <a href="#sec-crit">Evaluation Criteria</a>
+      <a href="#sec-comp">Compliance vs RFP</a>
+      <a href="#sec-assess">Assessment</a>
+      <button type="button" id="downloadPdfBtn" class="nav-pdf-btn">&#11015; Download PDF</button>
+    </nav>
+
+    <div class="pdf-title" id="pdfTitle">
+      <div style="font-family:'Inter',sans-serif;font-weight:800;font-size:20px;color:var(--ink);">RFP Intelligence — Go/No-Go Analysis</div>
+      <div style="font-family:'Inter',sans-serif;font-size:11.5px;color:var(--muted);margin:4px 0 18px;" id="pdfMeta"></div>
+    </div>
+
+    <div id="sec-overview">
       <div id="verdictBox" class="verdict">
-        <div class="stamp" id="verdictStamp">—</div>
-        <div class="score-block">
-          <div class="score" id="scoreNum">--</div>
-          <div class="score-label">Fit / 100</div>
-        </div>
+        <div class="score" id="scoreNum">--</div>
         <div class="vtext">
           <div class="label" id="verdictLabel">—</div>
           <p id="verdictText">—</p>
         </div>
       </div>
+
+      <div class="card">
+        <div class="summary-grid">
+          <div class="sumcell"><div class="n" id="sumDeliv">0</div><div class="l">Deliverables</div></div>
+          <div class="sumcell"><div class="n" id="sumWeeks">0</div><div class="l">Est. Weeks Total</div></div>
+          <div class="sumcell"><div class="n" id="sumMet">0</div><div class="l">Requirements Met</div></div>
+          <div class="sumcell"><div class="n" id="sumGap">0</div><div class="l">Compliance Gaps</div></div>
+        </div>
+      </div>
     </div>
 
-    <div class="summary-grid">
-      <div class="sumcell"><div class="n" id="sumDeliv">0</div><div class="l">Deliverables</div></div>
-      <div class="sumcell"><div class="n" id="sumWeeks">0</div><div class="l">Est. Weeks Total</div></div>
-      <div class="sumcell"><div class="n" id="sumMet">0</div><div class="l">Requirements Met</div></div>
-      <div class="sumcell"><div class="n" id="sumGap">0</div><div class="l">Compliance Gaps</div></div>
+    <div id="sec-deliv">
+      <div class="section-h">Deliverables &amp; Time Estimate</div>
+      <div class="card" id="delivCard"></div>
     </div>
 
-    <div class="section-h"><span class="tag-no">§1</span> Deliverables &amp; Time Estimate</div>
-    <div class="card" id="delivCard"></div>
-
-    <div class="section-h"><span class="tag-no">§2</span> Evaluation Criteria — How The Client Will Score Us</div>
-    <div class="card" id="critCard"></div>
-
-    <div class="section-h"><span class="tag-no">§3</span> Department Compliance Checklist</div>
-    <div class="card" id="deptCard"></div>
-
-    <div class="section-h"><span class="tag-no">§4</span> Opportunity Assessment</div>
-    <div class="card">
-      <div class="rationale-box" id="rationaleBox"></div>
+    <div id="sec-crit">
+      <div class="section-h">Evaluation Criteria (How The Client Will Score Us)</div>
+      <div class="card" id="critCard"></div>
     </div>
 
-    <div class="save-pdf-row">
-      <button class="btn save-pdf" id="savePdfBtn">Save as PDF</button>
+    <div id="sec-comp">
+      <div class="section-h">Compliance Checklist — RFP Requirement vs. Company Position</div>
+      <p class="hint" style="margin:-8px 0 16px;">Every line below shows exactly what the RFP asks for next to what your company said, with the specific reason it was marked Met, Gap, or Needs Review.</p>
+      <div id="deptFilterWrap" class="filter-tabs"></div>
+      <div id="deptCard"></div>
     </div>
- 
- 
+
+    <div id="sec-assess">
+      <div class="section-h">Opportunity Assessment</div>
+      <div class="card">
+        <div class="rationale-box" id="rationaleBox"></div>
+      </div>
+    </div>
+
     <div class="reset-row">
       <button class="btn ghost" id="resetBtn">Analyze a different RFP</button>
     </div>
-
-    <footer class="signoff">
-      <span>GENERATED BY RFP INTELLIGENCE — AUTOMATED ANALYSIS, NOT LEGAL ADVICE</span>
-      <span id="timestamp"></span>
-    </footer>
   </div>
 
 </div>
@@ -665,9 +572,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   document.getElementById('setup-card').style.display = 'block';
   window.scrollTo({top:0, behavior:'smooth'});
 });
-document.getElementById('savePdfBtn').addEventListener('click', () => {
-  window.print();
-});
+document.getElementById('downloadPdfBtn').addEventListener('click', downloadPdf);
 
 async function runAnalysis() {
   showError(null);
@@ -687,8 +592,6 @@ async function runAnalysis() {
     renderResults(data);
     document.getElementById('setup-card').style.display = 'none';
     document.getElementById('results').style.display = 'block';
-    const ts = document.getElementById('timestamp');
-    if (ts) ts.textContent = 'ANALYZED ' + new Date().toLocaleString();
     window.scrollTo({top:0, behavior:'smooth'});
   } catch (err) {
     setStatus(false);
@@ -720,20 +623,19 @@ function escapeHtml(str) {
 }
 
 function renderResults(data) {
+  // PDF export header (hidden on screen, shown only in the exported PDF)
+  const fname = currentFile ? currentFile.name : 'uploaded RFP';
+  document.getElementById('pdfMeta').textContent =
+    `Source document: ${fname}  ·  Generated ${new Date().toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}`;
+
   // Verdict
   const rec = (data.recommendation || 'CAUTION').toUpperCase();
   const score = Math.max(0, Math.min(100, Math.round(data.fit_score ?? 50)));
   const verdictBox = document.getElementById('verdictBox');
-  const cls = rec === 'GO' ? 'go' : rec === 'NO-GO' ? 'nogo' : 'caution';
-  verdictBox.className = 'verdict ' + cls;
+  verdictBox.className = 'verdict ' + (rec === 'GO' ? 'go' : rec === 'NO-GO' ? 'nogo' : 'caution');
   document.getElementById('scoreNum').textContent = score;
-  document.getElementById('verdictStamp').textContent = rec === 'GO' ? 'Approved for Bid' : rec === 'NO-GO' ? 'Rejected' : 'Conditional';
   document.getElementById('verdictLabel').textContent = rec === 'GO' ? 'PURSUE — Recommended GO' : rec === 'NO-GO' ? 'DO NOT PURSUE — NO-GO' : 'PROCEED WITH CAUTION';
   document.getElementById('verdictText').textContent = data.recommendation_summary || '';
-  // restart stamp animation
-  const stampEl = document.getElementById('verdictStamp');
-  stampEl.style.animation = 'none';
-  requestAnimationFrame(() => { stampEl.style.animation = ''; });
 
   // Deliverables
   const deliv = data.deliverables || [];
@@ -770,47 +672,189 @@ function renderResults(data) {
     </div>`;
   }).join('') || '<p class="hint">No evaluation criteria identified.</p>';
 
-  // Compliance departments
-  const depts = data.compliance_departments || [];
-  let metCount = 0, gapCount = 0;
-  const deptColors = { met: ['met','&#10003;','pill-met','MET'], gap: ['gap','&#10007;','pill-gap','GAP'], needs_review: ['review','?','pill-review','REVIEW'] };
-  const deptCard = document.getElementById('deptCard');
-  deptCard.innerHTML = depts.map(dept => {
-    const items = dept.items || [];
-    const rows = items.map(it => {
-      const st = deptColors[it.status] || deptColors.needs_review;
-      if (it.status === 'met') metCount++;
-      if (it.status === 'gap') gapCount++;
-      return `<div class="check-item">
-        <div class="check-icon ${st[0]}">${st[1]}</div>
-        <div class="check-body" style="flex:1">
-          <div class="req">${escapeHtml(it.requirement)}</div>
-          <div class="note">${escapeHtml(it.note)}</div>
-        </div>
-        <span class="status-pill ${st[2]}">${st[3]}</span>
-      </div>`;
-    }).join('');
-    const deptColor = dept.department === 'Legal' ? '#7a3a8a' : dept.department === 'Accounting' ? '#1f6b45' : dept.department === 'Technical' ? '#142a4a' : '#b3791f';
-    return `<div class="dept-block">
-      <div class="dept-head">
-        <span class="dept-badge" style="background:${deptColor}1a;color:${deptColor}">${escapeHtml(dept.department)}</span>
-      </div>
-      ${rows}
-    </div>`;
-  }).join('') || '<p class="hint">No compliance items identified.</p>';
-
-  document.getElementById('sumMet').textContent = metCount;
-  document.getElementById('sumGap').textContent = gapCount;
+  // Compliance departments — side-by-side RFP vs company comparison
+  renderCompliance(data.compliance_departments || []);
 
   // Rationale
   const reasons = (data.key_reasons || []).map(r => `<li>${escapeHtml(r)}</li>`).join('');
   const disq = (data.disqualifiers || []);
-  const disqHtml = disq.length ? `<p style="margin-top:14px;color:var(--stamp-red);font-weight:700;">Potential disqualifiers:</p><ul>${disq.map(d=>`<li>${escapeHtml(d)}</li>`).join('')}</ul>` : '';
+  const disqHtml = disq.length ? `<p style="margin-top:14px;color:var(--bad);font-weight:600;">Potential disqualifiers:</p><ul>${disq.map(d=>`<li>${escapeHtml(d)}</li>`).join('')}</ul>` : '';
   document.getElementById('rationaleBox').innerHTML = `
-    <p style="font-weight:700;">Key reasons behind the ${rec} call:</p>
+    <p style="margin:0 0 6px;font-weight:700;">Key reasons behind the ${rec} call:</p>
     <ul>${reasons}</ul>
     ${disqHtml}
   `;
+
+  setupScrollspy();
+}
+
+// ---- Compliance checklist: side-by-side RFP vs company view, with filtering ----
+let complianceData = [];
+let activeFilter = 'all';
+
+function renderCompliance(depts) {
+  complianceData = depts;
+  let metCount = 0, gapCount = 0, reviewCount = 0;
+  depts.forEach(d => (d.items || []).forEach(it => {
+    if (it.status === 'met') metCount++;
+    else if (it.status === 'gap') gapCount++;
+    else reviewCount++;
+  }));
+  const total = metCount + gapCount + reviewCount;
+
+  document.getElementById('sumMet').textContent = metCount;
+  document.getElementById('sumGap').textContent = gapCount;
+
+  const filterWrap = document.getElementById('deptFilterWrap');
+  const filters = [
+    { key: 'all', label: 'All items', cls: '', n: total },
+    { key: 'gap', label: 'Gaps', cls: 'f-gap', n: gapCount },
+    { key: 'needs_review', label: 'Needs Review', cls: 'f-review', n: reviewCount },
+    { key: 'met', label: 'Met', cls: 'f-met', n: metCount },
+  ];
+  filterWrap.innerHTML = filters.map(f =>
+    `<button type="button" class="filter-tab ${f.cls} ${activeFilter===f.key?'active':''}" data-filter="${f.key}">${f.label}<span class="cnt">${f.n}</span></button>`
+  ).join('');
+  filterWrap.querySelectorAll('.filter-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeFilter = btn.getAttribute('data-filter');
+      renderCompliance(complianceData);
+    });
+  });
+
+  const deptCard = document.getElementById('deptCard');
+  const deptColorMap = { Legal: '#7a2e8a', Accounting: '#1c7a4d', Technical: '#1f3864', Operations: '#9a6b00', Other: '#5a5248' };
+  const statusMeta = {
+    met:          { cls: 'st-met',    pill: 'pill-met',    label: 'MET',           icon: '&#10003;' },
+    gap:          { cls: 'st-gap',    pill: 'pill-gap',    label: 'GAP — REJECTED',icon: '&#10007;' },
+    needs_review: { cls: 'st-review', pill: 'pill-review', label: 'NEEDS REVIEW',  icon: '?' },
+  };
+
+  const blocks = depts.map((dept, di) => {
+    const items = (dept.items || []).filter(it => activeFilter === 'all' || it.status === activeFilter);
+    if (!items.length) return '';
+    const deptColor = deptColorMap[dept.department] || deptColorMap.Other;
+    const rows = items.map(it => {
+      const sm = statusMeta[it.status] || statusMeta.needs_review;
+      const rfpText = it.rfp_excerpt || it.rfp_reference || '(No specific RFP clause identified for this item.)';
+      const companyText = it.company_position || it.note || '(Not addressed in provided strengths/gaps.)';
+      const reason = it.reason || it.note || '';
+      return `<div class="compare-item ${sm.cls}">
+        <div class="compare-top">
+          <span class="req">${escapeHtml(it.requirement)}</span>
+          <span class="status-pill ${sm.pill}">${sm.label}</span>
+        </div>
+        <div class="compare-grid">
+          <div class="compare-col rfp">
+            <div class="colhead">RFP requires</div>
+            <div class="txt">${escapeHtml(rfpText)}</div>
+          </div>
+          <div class="compare-col company">
+            <div class="colhead">Company position</div>
+            <div class="txt">${escapeHtml(companyText)}</div>
+          </div>
+        </div>
+        ${reason ? `<div class="compare-reason"><span class="ricon">${sm.icon}</span><span><b>Why:</b> ${escapeHtml(reason)}</span></div>` : ''}
+      </div>`;
+    }).join('');
+
+    return `<div class="dept-block" id="dept-${di}">
+      <div class="dept-head" data-toggle="dept-${di}">
+        <div class="left">
+          <span class="dept-badge" style="background:${deptColor}1a;color:${deptColor}">${escapeHtml(dept.department)}</span>
+          <span class="counts">${items.length} item${items.length===1?'':'s'} shown</span>
+        </div>
+        <span class="chev">&#9660;</span>
+      </div>
+      <div class="dept-items">${rows}</div>
+    </div>`;
+  }).join('');
+
+  deptCard.innerHTML = blocks || '<p class="hint" style="padding:4px 0;">No items match this filter.</p>';
+
+  deptCard.querySelectorAll('.dept-head').forEach(head => {
+    head.addEventListener('click', () => {
+      head.closest('.dept-block').classList.toggle('collapsed');
+    });
+  });
+}
+
+// ---- Sticky nav: highlight the section in view as the user scrolls ----
+let scrollspyBound = false;
+function setupScrollspy() {
+  const nav = document.getElementById('resultsNav');
+  if (!nav) return;
+  const links = Array.from(nav.querySelectorAll('a'));
+  const sections = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+
+  function updateActive() {
+    let current = sections[0];
+    const y = window.scrollY + 120;
+    sections.forEach(sec => { if (sec.offsetTop <= y) current = sec; });
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current.id));
+  }
+
+  links.forEach(a => a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) window.scrollTo({ top: target.offsetTop - 70, behavior: 'smooth' });
+  }));
+
+  if (!scrollspyBound) {
+    window.addEventListener('scroll', updateActive, { passive: true });
+    scrollspyBound = true;
+  }
+  updateActive();
+}
+
+// ---- Download the full generated report (including the RFP-vs-company checklist) as a PDF ----
+async function downloadPdf() {
+  const btn = document.getElementById('downloadPdfBtn');
+  if (typeof html2pdf === 'undefined') {
+    showError("PDF library failed to load. Make sure vendor/html2pdf.bundle.min.js is present next to index.html.");
+    return;
+  }
+
+  const savedFilter = activeFilter;
+  activeFilter = 'all';                 // PDF should include every checklist item, not just the current filter view
+  renderCompliance(complianceData);
+
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = 'Preparing PDF…';
+
+  const source = document.getElementById('results');
+  const clone = source.cloneNode(true);
+  clone.querySelectorAll('#resultsNav, .reset-row, #deptFilterWrap').forEach(el => el.remove());
+  clone.querySelectorAll('.dept-block.collapsed').forEach(el => el.classList.remove('collapsed'));
+  clone.querySelector('#pdfTitle').style.display = 'block';
+  clone.style.cssText = 'position:fixed;top:0;left:-99999px;width:760px;background:#fff;padding:6px 4px;';
+  document.body.appendChild(clone);
+
+  const today = new Date().toISOString().slice(0, 10);
+  const fname = (currentFile ? currentFile.name.replace(/\.[^.]+$/, '') : 'rfp-analysis')
+    .replace(/[^a-z0-9\-_]+/gi, '_');
+
+  const opt = {
+    margin: [12, 10, 14, 10],
+    filename: `${fname}-analysis-${today}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
+  };
+
+  try {
+    await html2pdf().set(opt).from(clone).save();
+  } catch (err) {
+    showError('Could not generate the PDF: ' + err.message);
+  } finally {
+    clone.remove();
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+    activeFilter = savedFilter;
+    renderCompliance(complianceData);
+  }
 }
 </script>
 </body>
