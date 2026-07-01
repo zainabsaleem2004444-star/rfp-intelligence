@@ -340,6 +340,19 @@
   }
   .pdf-title{display:none;}
 
+  /* PDF export mode: hide interactive-only chrome, show the print title */
+  body.pdf-export-mode .results-nav,
+  body.pdf-export-mode #deptFilterWrap,
+  body.pdf-export-mode .reset-row{
+    display:none !important;
+  }
+  body.pdf-export-mode .pdf-title{
+    display:block !important;
+  }
+  body.pdf-export-mode .dept-items{
+    display:block !important;
+  }
+
   .rationale-box{
     background:#fafaf6;border-left:3px solid var(--brand);
     padding:16px 18px;font-size:14.5px;margin-top:6px;
@@ -815,21 +828,29 @@ async function downloadPdf() {
     return;
   }
 
+  // Show every checklist item in the export, regardless of the on-screen filter,
+  // and make sure no department section is left collapsed (collapsed content is
+  // display:none, which the PDF renderer would otherwise capture as blank).
   const savedFilter = activeFilter;
-  activeFilter = 'all';                 // PDF should include every checklist item, not just the current filter view
+  activeFilter = 'all';
   renderCompliance(complianceData);
+  const collapsedBlocks = Array.from(document.querySelectorAll('#deptCard .dept-block.collapsed'));
+  collapsedBlocks.forEach(el => el.classList.remove('collapsed'));
 
   btn.disabled = true;
   const originalLabel = btn.textContent;
   btn.textContent = 'Preparing PDF…';
 
+  // Render the PDF from the real, visible #results element (in its normal place in
+  // the page) instead of an off-screen clone. Off-screen clones are what caused the
+  // blank-page export: some browsers fail to rasterize elements positioned far
+  // outside the viewport. Toggling a body class to hide the interactive-only chrome
+  // (nav bar, filter tabs, reset button) and show the print title is reliable
+  // because the element being captured never leaves the document flow.
+  document.body.classList.add('pdf-export-mode');
+  window.scrollTo({ top: 0, behavior: 'auto' });
+
   const source = document.getElementById('results');
-  const clone = source.cloneNode(true);
-  clone.querySelectorAll('#resultsNav, .reset-row, #deptFilterWrap').forEach(el => el.remove());
-  clone.querySelectorAll('.dept-block.collapsed').forEach(el => el.classList.remove('collapsed'));
-  clone.querySelector('#pdfTitle').style.display = 'block';
-  clone.style.cssText = 'position:fixed;top:0;left:-99999px;width:760px;background:#fff;padding:6px 4px;';
-  document.body.appendChild(clone);
 
   const today = new Date().toISOString().slice(0, 10);
   const fname = (currentFile ? currentFile.name.replace(/\.[^.]+$/, '') : 'rfp-analysis')
@@ -839,17 +860,21 @@ async function downloadPdf() {
     margin: [12, 10, 14, 10],
     filename: `${fname}-analysis-${today}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0 },
     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
     pagebreak: { mode: ['css', 'legacy'] }
   };
 
   try {
-    await html2pdf().set(opt).from(clone).save();
+    // small delay so the browser finishes applying the layout changes above
+    // before html2canvas takes its snapshot
+    await new Promise(r => setTimeout(r, 50));
+    await html2pdf().set(opt).from(source).save();
   } catch (err) {
     showError('Could not generate the PDF: ' + err.message);
   } finally {
-    clone.remove();
+    document.body.classList.remove('pdf-export-mode');
+    collapsedBlocks.forEach(el => el.classList.add('collapsed'));
     btn.disabled = false;
     btn.textContent = originalLabel;
     activeFilter = savedFilter;
